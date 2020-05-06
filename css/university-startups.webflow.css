@@ -2005,11 +2005,12 @@ h3 {
   grid-template-columns: 1fr 1fr;
 }
 
-.feature-image-1 {
+.headerimage {
   display: block;
   width: 100%;
   max-width: 540px;
-  margin-left: 20px;
+  margin-left: 0px;
+  padding-top: 50px;
 }
 
 .h2 {
@@ -2067,9 +2068,11 @@ h3 {
 }
 
 .feature-text-block {
-  padding-top: 0px;
-  padding-right: 60px;
-  padding-bottom: 25px;
+  padding: 0px 0px 25px 60px;
+}
+
+.feature-text-block.second {
+  padding-left: 0px;
 }
 
 .small-blocks {
@@ -2151,7 +2154,7 @@ h3 {
 
 .feature-header {
   margin-bottom: 12px;
-  font-family: Circularstd, sans-serif;
+  font-family: 'PT Serif', serif;
   color: #1b2d45;
   font-size: 21px;
   line-height: 34px;
@@ -2465,7 +2468,7 @@ h3 {
   padding: 20px;
   border-radius: 500px;
   background-color: #3998da;
-  font-family: Circularstd, sans-serif;
+  font-family: 'PT Serif', serif;
   font-size: 16px;
   font-weight: 500;
 }
@@ -3346,6 +3349,11 @@ h3 {
   font-weight: 700;
 }
 
+.headerimage2 {
+  margin-top: -35px;
+  padding-top: 0px;
+}
+
 @media screen and (max-width: 991px) {
   .hero-grid-wrapper {
     grid-column-gap: 25px;
@@ -3640,6 +3648,12 @@ h3 {
   .grid-icon {
     margin-bottom: 15px;
   }
+  .h2 {
+    font-size: 35px;
+  }
+  .feature-text-block {
+    padding-left: 0px;
+  }
   .grid-wrapper-2 {
     -ms-grid-columns: 1fr;
     grid-template-columns: 1fr;
@@ -3666,6 +3680,9 @@ h3 {
   .footer-grid {
     -ms-grid-columns: 1fr;
     grid-template-columns: 1fr;
+  }
+  .hero-h1 {
+    font-size: 35px;
   }
   .flowbase-close-card {
     top: 0px;
