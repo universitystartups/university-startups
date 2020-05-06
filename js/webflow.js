@@ -31499,7 +31499,7 @@ var SCHEDULED_PUBLISH_LIMIT_IN_MS = 5 * YEAR;
  */
 
 exports.SCHEDULED_PUBLISH_LIMIT_IN_MS = SCHEDULED_PUBLISH_LIMIT_IN_MS;
-var SCHEDULED_PUBLISH_GRACE_PERIOD_IN_MS = 5 * MINUTE;
+var SCHEDULED_PUBLISH_GRACE_PERIOD_IN_MS = 30 * MINUTE;
 /* An enum of the types of collections in our app. This allows us to handle
  * cases based on collection type by using the function getCollectionType
  */

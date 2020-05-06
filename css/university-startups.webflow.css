@@ -2001,14 +2001,15 @@ h3 {
   align-self: stretch;
   grid-column-gap: 58px;
   grid-row-gap: 30px;
-  -ms-grid-columns: 1fr 1.25fr;
-  grid-template-columns: 1fr 1.25fr;
+  -ms-grid-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 .feature-image-1 {
   display: block;
   width: 100%;
   max-width: 540px;
+  margin-left: 20px;
 }
 
 .h2 {
