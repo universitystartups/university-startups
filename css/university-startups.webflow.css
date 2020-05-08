@@ -1894,6 +1894,10 @@ h3 {
   background-color: #5e727d;
 }
 
+.service-section.white {
+  background-color: #e2e4e8;
+}
+
 .service-grid {
   margin-top: 55px;
   margin-bottom: 75px;
@@ -2055,6 +2059,11 @@ h3 {
 
 .standard-paragraph.center.dark {
   color: #1b2d45;
+}
+
+.standard-paragraph.center.top {
+  margin-bottom: 25px;
+  color: #000;
 }
 
 .standard-paragraph._40-bottom-margin {
