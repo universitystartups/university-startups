@@ -2062,7 +2062,7 @@ h3 {
 }
 
 .standard-paragraph.center.top {
-  margin-bottom: 25px;
+  margin-bottom: 0px;
   color: #000;
 }
 
@@ -2521,6 +2521,7 @@ h3 {
 }
 
 .input-field {
+  margin-top: 20px;
   padding-top: 28px;
   padding-bottom: 28px;
   padding-left: 80px;
@@ -3394,6 +3395,58 @@ h3 {
   -ms-flex-direction: column;
   flex-direction: column;
   text-align: center;
+}
+
+.modal {
+  position: fixed;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+  z-index: 99999;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.modal-content {
+  position: relative;
+  z-index: 1;
+  max-width: 550px;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  border-radius: 15px;
+  background-color: #fff;
+}
+
+.close-modal {
+  position: absolute;
+  left: auto;
+  top: -25%;
+  right: -25px;
+  bottom: auto;
+  color: #fff;
+  font-size: 40px;
+  text-decoration: none;
+}
+
+.close-modal-bg {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
 }
 
 @media screen and (max-width: 991px) {
