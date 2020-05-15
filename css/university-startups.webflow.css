@@ -3466,6 +3466,11 @@ h3 {
   font-size: 15px;
 }
 
+.div {
+  min-height: 30%;
+  margin-top: 100px;
+}
+
 @media screen and (max-width: 991px) {
   .hero-grid-wrapper {
     grid-column-gap: 25px;
