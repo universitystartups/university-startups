@@ -12106,7 +12106,7 @@ var getOrderDataFromGraphQLResponse = function getOrderDataFromGraphQLResponse(d
 exports.getOrderDataFromGraphQLResponse = getOrderDataFromGraphQLResponse;
 
 var orderRequiresAdditionalAction = function orderRequiresAdditionalAction(status) {
-  return status === 'requires_action' || status === 'requires_source_action';
+  return status === 'requires_action';
 };
 
 exports.orderRequiresAdditionalAction = orderRequiresAdditionalAction;
@@ -39107,7 +39107,12 @@ var SharedConfig = function () {
     unknown: 'unknown'
   };
   api.ANALYTICS_SESSION_POLLING_FREQUENCY = 30000;
-  api.TEMPLATE_GENERATION_TEMPLATE_NAME = 'Templatized Base Theme'; // Export commonjs module
+  api.TEMPLATE_GENERATION_TEMPLATE_NAME = 'Templatized Base Theme';
+  api.blankTemplate = {
+    name: 'Blank Site',
+    description: 'Start from a blank canvas — and build exactly what you’re envisioning.',
+    starter: true
+  }; // Export commonjs module
 
   if ( true && module.exports) {
     module.exports = api;
@@ -77939,7 +77944,7 @@ var getTokenPath = function getTokenPath(tokenString) {
 };
 
 var isTokenPathWithValidPattern = function isTokenPathWithValidPattern(tokenPath) {
-  return /[^a-z0-1-:]/.test(tokenPath) === false;
+  return /[^a-z0-9-:]/.test(tokenPath) === false;
 };
 
 function getTokenUsages(text, tokenOptions) {
@@ -86770,7 +86775,7 @@ var handlePlaceOrder = function handlePlaceOrder(event, apolloClient) {
 // don't support vw/vh, we get the 100% instead
 
 
-var iframeStyle = "\n  display: block;\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  width: 100vw;\n  height: 100vh;\n  min-width: 100%;\n  min-height: 100%;\n  max-width: 100%;\n  max-height: 100%;\n  z-index: 2147483647;\n  border: 0;\n  background-color: #ffffff;\n";
+var iframeStyle = "\n  display: block;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  right: 0;\n  width: 100%;\n  height: 100%;\n  width: 100vw;\n  height: 100vh;\n  min-width: 100%;\n  min-height: 100%;\n  max-width: 100%;\n  max-height: 100%;\n  z-index: 2147483647;\n  border: 0;\n  background-color: #ffffff;\n";
 
 var createConfirmationIframe = function createConfirmationIframe(actions) {
   var documentRoot = document.documentElement; // we use this instead of document.body to appease the flow gods
@@ -86784,11 +86789,16 @@ var createConfirmationIframe = function createConfirmationIframe(actions) {
   var iframe = document.createElement('iframe');
   iframe.setAttribute('style', iframeStyle);
   iframe.setAttribute('src', '/paypal-checkout');
-  documentBody.appendChild(iframe);
+
+  if (!documentBody.parentNode) {
+    return;
+  }
+
+  documentBody.parentNode.appendChild(iframe);
   var previousRootOverflow = documentRoot.style.overflow;
   documentRoot.style.overflow = 'hidden';
-  var previousBodyOverflow = documentBody.style.overflow;
-  documentBody.style.overflow = 'hidden';
+  var previousBodyDisplay = documentBody.style.display;
+  documentBody.style.display = 'none';
 
   var paypalMessageHandler = function paypalMessageHandler(event) {
     if (event.origin !== window.location.origin) {
@@ -86816,13 +86826,16 @@ var createConfirmationIframe = function createConfirmationIframe(actions) {
         documentRoot.style.overflow = '';
       }
 
-      if (previousBodyOverflow) {
-        documentBody.style.overflow = previousBodyOverflow;
+      if (previousBodyDisplay) {
+        documentBody.style.display = previousBodyDisplay;
       } else {
-        documentBody.style.overflow = '';
+        documentBody.style.display = '';
       }
 
-      documentBody.removeChild(iframe);
+      if (documentBody.parentNode) {
+        documentBody.parentNode.removeChild(iframe);
+      }
+
       actions.restart();
     }
   };

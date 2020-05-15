@@ -1990,7 +1990,7 @@ h3 {
 }
 
 .content-section {
-  padding: 120px 3% 100px;
+  padding: 0px 3% 100px;
 }
 
 .features-grid-wrapper {
@@ -2007,6 +2007,8 @@ h3 {
   grid-row-gap: 30px;
   -ms-grid-columns: 1fr 1fr;
   grid-template-columns: 1fr 1fr;
+  -ms-grid-rows: auto;
+  grid-template-rows: auto;
 }
 
 .headerimage {
@@ -2014,7 +2016,7 @@ h3 {
   width: 100%;
   max-width: 540px;
   margin-left: 0px;
-  padding-top: 50px;
+  padding-top: 0px;
 }
 
 .h2 {
@@ -2067,7 +2069,7 @@ h3 {
 }
 
 .standard-paragraph._40-bottom-margin {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   font-family: 'PT Sans', sans-serif;
   color: #fff;
 }
@@ -2963,7 +2965,7 @@ h3 {
 }
 
 .button-hero {
-  margin-top: 40px;
+  margin-top: 31px;
   padding: 18px 32px;
   border-radius: 100px;
   background-color: #3998da;
@@ -3355,7 +3357,7 @@ h3 {
 
 .text-span-2 {
   font-family: 'PT Serif', serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -3447,6 +3449,21 @@ h3 {
   top: 0%;
   right: 0%;
   bottom: 0%;
+}
+
+.notif {
+  max-height: 60px;
+  max-width: 350px;
+  background-color: #5bfa55;
+}
+
+.notification {
+  min-width: 350px;
+  margin-top: 26px;
+  border-radius: 14px;
+  background-color: #bd2121;
+  font-family: 'PT Serif', serif;
+  font-size: 15px;
 }
 
 @media screen and (max-width: 991px) {
@@ -3829,14 +3846,14 @@ h3 {
   align-self: center;
 }
 
-#w-node-fc1c0c6788a3-cab10b0b {
+#w-node-93a1732c3c96-cab10b0b {
   -webkit-align-self: auto;
   -ms-flex-item-align: auto;
   -ms-grid-row-align: auto;
   align-self: auto;
 }
 
-#w-node-94a4efe98bb3-cab10b0b {
+#w-node-93a1732c3cf3-cab10b0b {
   -ms-grid-column-align: auto;
   justify-self: auto;
   -webkit-align-self: center;
@@ -3857,13 +3874,13 @@ h3 {
 }
 
 @media screen and (max-width: 767px) {
-  #w-node-56baff40e11e-cab10b0b {
+  #w-node-93a1732c3caa-cab10b0b {
     -webkit-box-ordinal-group: 10000;
     -webkit-order: 9999;
     -ms-flex-order: 9999;
     order: 9999;
   }
-  #w-node-0a2f00729a2d-cab10b0b {
+  #w-node-93a1732c3cbd-cab10b0b {
     -webkit-box-ordinal-group: 10000;
     -webkit-order: 9999;
     -ms-flex-order: 9999;
