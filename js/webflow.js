@@ -9129,7 +9129,7 @@ function () {
     key: "updateCartPaymentRequest",
     value: function updateCartPaymentRequest(index, orderData, siteData) {
       var stripeInstance = this.getStripeInstance();
-      var requiresShipping = orderData.statusFlags.requiresShipping;
+      var requiresShipping = Boolean(orderData.statusFlags.requiresShipping);
       var options = {
         country: siteData.businessAddress.country || siteData.defaultCountry || 'US',
         currency: siteData.defaultCurrency.toLowerCase(),
@@ -87906,7 +87906,7 @@ Webflow.define('navbar', module.exports = function ($, _) {
     if (config.animOver) {
       data.menu.height(bodyHeight);
     } else if (data.el.css('position') !== 'fixed') {
-      bodyHeight -= data.el.height();
+      bodyHeight -= data.el.outerHeight(true);
     }
 
     data.overlay && data.overlay.height(bodyHeight);

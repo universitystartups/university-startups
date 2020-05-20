@@ -1889,12 +1889,14 @@ h3 {
 }
 
 .service-section {
-  padding: 50px 3%;
+  padding: 75px 3% 50px;
   border-bottom: 1px none #e2e4e8;
   background-color: #5e727d;
 }
 
 .service-section.white {
+  padding-top: 25px;
+  padding-bottom: 25px;
   background-color: #e2e4e8;
 }
 
@@ -1990,7 +1992,7 @@ h3 {
 }
 
 .content-section {
-  padding: 0px 3% 100px;
+  padding: 0px 3% 50px;
 }
 
 .features-grid-wrapper {
@@ -2034,6 +2036,10 @@ h3 {
 }
 
 .h2.h2-centre.dark {
+  color: #000;
+}
+
+.h2.dark {
   color: #000;
 }
 
@@ -2123,7 +2129,7 @@ h3 {
 
 .feature-section {
   position: relative;
-  padding: 80px 3%;
+  padding: 50px 3%;
   border-bottom: 1px solid #e2e4e8;
   background-color: #e2e4e8;
 }
@@ -2443,7 +2449,7 @@ h3 {
   width: 100%;
   max-width: 100%;
   min-height: 200px;
-  margin: 160px auto;
+  margin: 100px auto 160px;
   padding-right: 80px;
   padding-left: 80px;
   -webkit-box-pack: justify;
