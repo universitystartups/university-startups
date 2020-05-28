@@ -11982,7 +11982,7 @@ var renderCheckout = function renderCheckout(checkout, data) {
   var billingAddressWrapper = (0, _commerceUtils.findElementByNodeType)(_constants.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_WRAPPER, checkout);
   var billingAddressToggle = (0, _commerceUtils.findElementByNodeType)(_constants.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_TOGGLE_CHECKBOX, checkout);
 
-  if (!(shippingMethodsList instanceof Element) || !(shippingMethodsEmpty instanceof Element) || !(billingAddressWrapper instanceof Element) || !(billingAddressToggle instanceof HTMLInputElement)) {
+  if (!(shippingMethodsList instanceof Element) || !(billingAddressWrapper instanceof Element) || !(billingAddressToggle instanceof HTMLInputElement)) {
     return;
   }
 
@@ -12004,15 +12004,26 @@ var renderCheckout = function renderCheckout(checkout, data) {
     }
 
     if (!availableShippingMethods || availableShippingMethods.length < 1) {
-      shippingMethodsList.style.setProperty('display', 'none');
-      shippingMethodsEmpty.style.removeProperty('display');
+      shippingMethodsList.style.setProperty('display', 'none'); // TODO: remove this ugliness when we've properly constrained & restructured the checkout form
+      // It is possible to remove the empty state so we can't return early, but don't want to crash here
+
+      if (shippingMethodsEmpty instanceof Element) {
+        shippingMethodsEmpty.style.removeProperty('display');
+      }
     } else {
-      shippingMethodsEmpty.style.setProperty('display', 'none');
+      // TODO remove after migration
+      if (shippingMethodsEmpty instanceof Element) {
+        shippingMethodsEmpty.style.setProperty('display', 'none');
+      }
+
       shippingMethodsList.style.removeProperty('display');
     }
   } else {
-    shippingMethodsList.style.setProperty('display', 'none');
-    shippingMethodsEmpty.style.removeProperty('display');
+    shippingMethodsList.style.setProperty('display', 'none'); // TODO remove after migration
+
+    if (shippingMethodsEmpty instanceof Element) {
+      shippingMethodsEmpty.style.removeProperty('display');
+    }
   }
 };
 
@@ -73306,14 +73317,12 @@ var handleBuyNow = function handleBuyNow(event, apolloClient) {
 
   if (!publishableKey) {
     var errorMsg = addToCartErrorElement.querySelector('.w-add-to-cart-error-msg');
-    console.log(errorMsg);
 
     if (!errorMsg) {
       return;
     }
 
     var errorText = errorMsg.getAttribute('data-w-add-to-cart-checkout-disabled-error') || 'Checkout is disabled.';
-    console.log(errorText);
     errorMsg.textContent = errorText;
     addToCartErrorElement.style.removeProperty('display');
     return;
@@ -81300,7 +81309,14 @@ exports.isEqual = isEqual;
 
 var memoize = function memoize(fn) {
   return (0, _reselect.defaultMemoize)(fn, isEqual);
-}; // FIXME: weak type is used
+};
+/*
+ * WARNING: `weakMemo` does not throw errors or handle invalid keys gracefully
+ * on purpose. This is a case where we want the app to crash if an invalid key
+ * is used. The purpose of allowing the app to crash in this situation is to
+ * collect data so a root cause might be discovered and addressed.
+ */
+// FIXME: weak type is used
 // eslint-disable-next-line flowtype/no-weak-types
 
 
