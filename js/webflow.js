@@ -873,16 +873,18 @@ var findClosestElementByClassName = function findClosestElementByClassName(class
   }
 
   return target;
-}; // FIXME: weak type is used
-// eslint-disable-next-line flowtype/no-weak-types
-
+};
 
 exports.findClosestElementByClassName = findClosestElementByClassName;
 
-var triggerRender = function triggerRender(error) {
+var triggerRender = function triggerRender( // FIXME: weak type is used
+// eslint-disable-next-line flowtype/no-weak-types
+error) {
+  var isInitial = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
   var renderEvent = new CustomEvent('wf-render-tree', {
     detail: {
-      error: error
+      error: error,
+      isInitial: isInitial
     }
   });
   window.dispatchEvent(renderEvent);
@@ -31571,13 +31573,19 @@ var SharedConfig = function () {
     name: 'Belgium',
     code: 'BE'
   }, {
+    name: 'Bulgaria',
+    code: 'BG'
+  }, {
     name: 'Brazil',
     code: 'BR'
   }, {
     name: 'Canada',
     code: 'CA'
   }, {
-    name: 'Czechia',
+    name: 'Cyprus',
+    code: 'CY'
+  }, {
+    name: 'Czech Republic',
     code: 'CZ'
   }, {
     name: 'Denmark',
@@ -31624,6 +31632,9 @@ var SharedConfig = function () {
   }, {
     name: 'Malaysia',
     code: 'MY'
+  }, {
+    name: 'Malta',
+    code: 'MT'
   }, {
     name: 'Mexico',
     code: 'MX'
@@ -65733,7 +65744,7 @@ function init(_ref) {
   (0, _checkoutUtils.initializeStripeElements)(stripeStore);
   detachHandlers();
   attachHandlers();
-  (0, _commerceUtils.triggerRender)();
+  (0, _commerceUtils.triggerRender)(null, true);
 
   if (!window.Webflow.env()) {
     window.Webflow.load((0, _paypalEvents.renderPaypalButtons)(apolloClient));
@@ -65744,7 +65755,7 @@ function init(_ref) {
 function preview() {
   detachHandlers();
   attachHandlers();
-  (0, _commerceUtils.triggerRender)();
+  (0, _commerceUtils.triggerRender)(null, true);
 } // `design` should always be called after `init`
 
 
@@ -66779,7 +66790,13 @@ var createApolloClient = function createApolloClient(_ref) {
     })]),
     cache: new _apolloCacheInmemory.InMemoryCache({
       dataIdFromObject: function dataIdFromObject(object) {
-        return object.id;
+        switch (object.__typename) {
+          case 'sku_props':
+            return null;
+
+          default:
+            return object.id;
+        }
       }
     }).restore(initialState || {})
   });
@@ -72574,7 +72591,7 @@ var _defineProperty2 = _interopRequireDefault2(__webpack_require__(11));
 var _taggedTemplateLiteral2 = _interopRequireDefault2(__webpack_require__(57));
 
 function _templateObject2() {
-  var data = (0, _taggedTemplateLiteral2["default"])(["\n  query FetchAllVariants($productId: BasicId!) {\n    database {\n      collections {\n        c_sku_ {\n          items(filter: {f_product_: {eq: $productId}}) {\n            id\n            f_price_ {\n              value\n              unit\n            }\n            f_weight_\n            f_width_\n            f_length_\n            f_height_\n            f_sku_\n            f_main_image_4dr {\n              url\n            }\n            f_more_images_4dr {\n              url\n              alt\n              file {\n                origFileName\n              }\n            }\n            f_sku_values_3dr {\n              value {\n                id\n              }\n              property {\n                id\n              }\n            }\n            inventory {\n              type\n              quantity\n            }\n            f_compare_at_price_7dr10dr {\n              unit\n              value\n            }\n          }\n        }\n      }\n    }\n  }\n"]);
+  var data = (0, _taggedTemplateLiteral2["default"])(["\n  query FetchAllVariants($productId: BasicId!) {\n    database {\n      collections {\n        c_sku_ {\n          items(filter: {f_product_: {eq: $productId}}) {\n            id\n            f_price_ {\n              value\n              unit\n            }\n            f_weight_\n            f_width_\n            f_length_\n            f_height_\n            f_sku_\n            f_main_image_4dr {\n              url\n            }\n            f_more_images_4dr {\n              url\n              alt\n              file {\n                origFileName\n              }\n            }\n            f_sku_values_3dr {\n              value {\n                id\n              }\n              property {\n                id\n              }\n            }\n            inventory {\n              type\n              quantity\n            }\n            f_compare_at_price_7dr10dr {\n              unit\n              value\n            }\n          }\n        }\n        c_product_ {\n          items(filter: {id: {eq: $productId}}) {\n            f_default_sku_7dr {\n              id\n            }\n          }\n        }\n      }\n    }\n  }\n"]);
 
   _templateObject2 = function _templateObject2() {
     return data;
@@ -73099,7 +73116,7 @@ var updateSkuBindings = function updateSkuBindings(binding, node, newSkuItem) {
   }
 };
 
-var handleAtcOptionSelectLoad = function handleAtcOptionSelectLoad(event, apolloClient) {
+var handleAtcOptionSelectLoad = function handleAtcOptionSelectLoad(event, apolloClient, stripeStore) {
   if (window.Webflow.env('design')) {
     return;
   }
@@ -73110,6 +73127,15 @@ var handleAtcOptionSelectLoad = function handleAtcOptionSelectLoad(event, apollo
 
   var addToCartForms = document.querySelectorAll("[".concat(_constants.DATA_ATTR_NODE_TYPE, "=\"").concat(_constants.NODE_TYPE_COMMERCE_ADD_TO_CART_FORM, "\"]"));
   (0, _forEach["default"])(addToCartForms, function (addToCartForm) {
+    // Hide the Buy now button if Stripe is not connected
+    if (stripeStore && !stripeStore.isInitialized()) {
+      var buyNowButton = (0, _commerceUtils.findElementByNodeType)(_constants.NODE_TYPE_COMMERCE_BUY_NOW_BUTTON, addToCartForm);
+
+      if (buyNowButton) {
+        hideElement(buyNowButton);
+      }
+    }
+
     var currentSkuId = addToCartForm instanceof Element && addToCartForm.getAttribute(_constants.DATA_ATTR_COMMERCE_SKU_ID);
 
     if (!currentSkuId) {
@@ -73133,6 +73159,7 @@ var handleAtcOptionSelectLoad = function handleAtcOptionSelectLoad(event, apollo
 
         if (currentSku) {
           var addToCartWrapper = addToCartForm.parentElement;
+          var optionListElement = (0, _commerceUtils.findElementByNodeType)(_constants.NODE_TYPE_COMMERCE_ADD_TO_CART_OPTION_LIST, addToCartWrapper);
           var outOfStockState = addToCartWrapper && addToCartWrapper.getElementsByClassName('w-commerce-commerceaddtocartoutofstock')[0]; // Check if exist a variant with stock
 
           var hasVariantsWithStock = items.some(function (variant) {
@@ -73171,7 +73198,27 @@ var handleAtcOptionSelectLoad = function handleAtcOptionSelectLoad(event, apollo
             var selectedOptionSets = optionSetsToUpdate.filter(function (optionSetToUpdate) {
               return optionSetToUpdate.value;
             });
-            disableVariantsWithNoStockForRemainingSelections(items, selectedOptionSets, optionSet, optionSetId);
+            disableVariantsWithNoStockForRemainingSelections(items, selectedOptionSets, optionSet, optionSetId); // Preselect the default variant if setting has been enabled and initial render
+
+            if (event.detail.isInitial && optionListElement && optionListElement.getAttribute(_constants.DATA_ATTR_PRESELECT_DEFAULT_VARIANT) === 'true') {
+              var defaultSkuId = (0, _get["default"])(data, ['database', 'collections', 'c_product_', 'items', 0, 'f_default_sku_7dr', 'id']);
+              var defaultSku = items.find(function (item) {
+                return item.id === defaultSkuId;
+              }); // Ensure the default variant is in stock before preselecting
+
+              if (defaultSku && !(defaultSku.inventory.type === _constants.INVENTORY_TYPE_FINITE && defaultSku.inventory.quantity <= 0)) {
+                var defaultSkuIndex = Array.from(optionSet.options).findIndex(function (option) {
+                  return defaultSku.f_sku_values_3dr.some(function (value) {
+                    return value.value.id === option.value;
+                  });
+                });
+
+                if (defaultSkuIndex > -1) {
+                  optionSet.selectedIndex = defaultSkuIndex;
+                  addToCartForm.setAttribute(_constants.DATA_ATTR_COMMERCE_SKU_ID, defaultSku.id);
+                }
+              }
+            }
           });
         }
       });
@@ -76317,8 +76364,8 @@ module.exports = unicodeWords;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.WF_COLLECTION_DATA_KEY = exports.WF_CONDITION_DATA_KEY = exports.WF_BINDING_DATA_KEY = exports.DEFAULT_SKU_SLUG = exports.COMMERCE_PLUGIN_KEY = exports.COMMERCE_CATEGORY_COLLECTION_SLUG = exports.COMMERCE_PRODUCT_FIELD_SLUG = exports.COMMERCE_PRODUCT_COLLECTION_SLUG = exports.COMMERCE_SKU_FIELD_SLUG = exports.COMMERCE_SKU_COLLECTION_SLUG = exports.COMMERCE_CART_ITEM_ID_ATTR = exports.COMMERCE_CART_PUBLISHED_SITE_ACTIONS = exports.COMMERCE_CART_PUBLISHED_SITE_ACTION_ATTR = exports.CART_PRODUCT_ADDED_DEFAULT = exports.CART_PRODUCT_ADDED_KEYPATH = exports.CART_PRODUCT_ADDED_KEY = exports.CART_TYPE_DROPDOWN_ON_OPEN_KEY = exports.CART_TYPE_KEY = exports.CHECKOUT_PLACE_ORDER_LOADING_TEXT_DEFAULT = exports.CHECKOUT_PLACE_ORDER_BUTTON_TEXT_DEFAULT = exports.CART_CHECKOUT_LOADING_TEXT_DEFAULT = exports.CART_CHECKOUT_BUTTON_TEXT_DEFAULT = exports.LOADING_TEXT_DEFAULT = exports.LOADING_TEXT = exports.HIDE_CART_COUNT_DEFAULT = exports.HIDE_CART_COUNT_KEYPATH = exports.HIDE_CART_COUNT_KEY = exports.HIDE_CART_WHEN_EMPTY_DEFAULT = exports.HIDE_CART_WHEN_EMPTY_KEYPATH = exports.HIDE_CART_WHEN_EMPTY_KEY = exports.BILLING_ADDRESS_TOGGLE_DEFAULT = exports.BILLING_ADDRESS_TOGGLE_KEYPATH = exports.BILLING_ADDRESS_TOGGLE_KEY = exports.OPEN_STATE_DEFAULT = exports.OPEN_STATE_KEYPATH = exports.OPEN_STATE_KEY = exports.SHIPPING_METHODS_STATE = exports.CHECKOUT_STATE = exports.QUICK_CHECKOUT_STATE_KEYPATH = exports.QUICK_CHECKOUT_STATE = exports.CART_STATE = exports.STATE = exports.QUANTITY_ENABLED_DEFAULT = exports.QUANTITY_ENABLED = exports.PREVIEW_ITEMS_KEYPATH = exports.PREVIEW_ITEMS_KEY = exports.PREVIEW_ITEMS_DEFAULT = exports.QUICK_CHECKOUT_AUTOMATION = exports.QUICK_CHECKOUT_STATES = exports.CART_COUNT_HIDE_RULES = exports.CART_TYPES = exports.CART_TYPE_DROPDOWN_ON_OPEN = exports.SHIPPING_METHODS_STATES = exports.CHECKOUT_STATES = exports.CART_STATES_AUTOMATION = exports.CART_STATES = exports.ADD_TO_CART_STATES = exports.NODE_TYPE_COMMERCE_DOWNLOADS_BUTTON = exports.NODE_TYPE_COMMERCE_BUY_NOW_BUTTON = exports.NODE_TYPE_COMMERCE_CHECKOUT_DISCOUNT_INPUT = exports.NODE_TYPE_COMMERCE_CHECKOUT_DISCOUNT_FORM = exports.NODE_TYPE_COMMERCE_PAYPAL_CHECKOUT_ERROR_STATE = exports.NODE_TYPE_COMMERCE_PAYPAL_CHECKOUT_FORM_CONTAINER = exports.NODE_TYPE_COMMERCE_CHECKOUT_ADDITIONAL_INFO = exports.NODE_TYPE_COMMERCE_CART_APPLE_PAY_BUTTON = exports.NODE_TYPE_COMMERCE_CART_QUICK_CHECKOUT_BUTTON = exports.NODE_TYPE_COMMERCE_CART_QUICK_CHECKOUT_ACTIONS = exports.NODE_TYPE_COMMERCE_ORDER_CONFIRMATION_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_ERROR_STATE = exports.NODE_TYPE_COMMERCE_CHECKOUT_PLACE_ORDER_BUTTON = exports.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_TOGGLE_CHECKBOX = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_EMPTY_STATE = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_LIST = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_ADDRESS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_CUSTOMER_INFO_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_FORM_CONTAINER = exports.NODE_NAME_COMMERCE_ADD_TO_CART_QUANTITY_INPUT = exports.NODE_TYPE_COMMERCE_CART_FORM = exports.NODE_TYPE_COMMERCE_CART_CHECKOUT_BUTTON = exports.NODE_TYPE_COMMERCE_CART_CONTAINER = exports.NODE_TYPE_COMMERCE_CART_CONTAINER_WRAPPER = exports.NODE_TYPE_COMMERCE_CART_CLOSE_LINK = exports.NODE_TYPE_COMMERCE_CART_OPEN_LINK = exports.NODE_TYPE_COMMERCE_CART_WRAPPER = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_OPTION_LIST = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_OPTION_SELECT = exports.NODE_TYPE_COMMERCE_CART_ERROR = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_ERROR = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_FORM = exports.DATA_ATTR_COUNT_HIDE_RULE = exports.DATA_ATTR_OPEN_ON_HOVER = exports.DATA_ATTR_OPEN_PRODUCT = exports.DATA_ATTR_LOADING_TEXT = exports.DATA_ATTR_NODE_TYPE = exports.DATA_ATTR_COMMERCE_PRODUCT_ID = exports.DATA_ATTR_COMMERCE_OPTION_SET_ID = exports.DATA_ATTR_COMMERCE_PRODUCT_CURRENT_SKU_VALUES = exports.DATA_ATTR_COMMERCE_SKU_ID = void 0;
-exports.ORDER_TYPE = exports.CHECKOUT_BINDING_ROOT_QUERY_PATH = exports.symbolMap = exports.EDITABLE_STYLE_NAMES = exports.DATA_ATTR_PUBLISHABLE_KEY = exports.ANIMATION_DURATION_KEYPATH = exports.ANIMATION_DURATION_KEY = exports.ANIMATION_DURATION_DEFAULT = exports.DATA_ATTR_ANIMATION_DURATION = exports.ANIMATION_EASING_KEYPATH = exports.ANIMATION_EASING_KEY = exports.ANIMATION_EASING_DEFAULT = exports.DATA_ATTR_ANIMATION_EASING = exports.ADD_TO_CART_ERRORS = exports.CART_ERRORS = exports.CHECKOUT_ERRORS = exports.WF_SKU_CONDITION_DATA_KEY = exports.WF_SKU_BINDING_DATA_KEY = exports.WF_TEMPLATE_ID_DATA_KEY = void 0;
+exports.WF_CONDITION_DATA_KEY = exports.WF_BINDING_DATA_KEY = exports.DEFAULT_SKU_SLUG = exports.COMMERCE_PLUGIN_KEY = exports.COMMERCE_CATEGORY_COLLECTION_SLUG = exports.COMMERCE_PRODUCT_FIELD_SLUG = exports.COMMERCE_PRODUCT_COLLECTION_SLUG = exports.COMMERCE_SKU_FIELD_SLUG = exports.COMMERCE_SKU_COLLECTION_SLUG = exports.COMMERCE_CART_ITEM_ID_ATTR = exports.COMMERCE_CART_PUBLISHED_SITE_ACTIONS = exports.COMMERCE_CART_PUBLISHED_SITE_ACTION_ATTR = exports.CART_PRODUCT_ADDED_DEFAULT = exports.CART_PRODUCT_ADDED_KEYPATH = exports.CART_PRODUCT_ADDED_KEY = exports.CART_TYPE_DROPDOWN_ON_OPEN_KEY = exports.CART_TYPE_KEY = exports.CHECKOUT_PLACE_ORDER_LOADING_TEXT_DEFAULT = exports.CHECKOUT_PLACE_ORDER_BUTTON_TEXT_DEFAULT = exports.CART_CHECKOUT_LOADING_TEXT_DEFAULT = exports.CART_CHECKOUT_BUTTON_TEXT_DEFAULT = exports.LOADING_TEXT_DEFAULT = exports.LOADING_TEXT = exports.HIDE_CART_COUNT_DEFAULT = exports.HIDE_CART_COUNT_KEYPATH = exports.HIDE_CART_COUNT_KEY = exports.HIDE_CART_WHEN_EMPTY_DEFAULT = exports.HIDE_CART_WHEN_EMPTY_KEYPATH = exports.HIDE_CART_WHEN_EMPTY_KEY = exports.BILLING_ADDRESS_TOGGLE_DEFAULT = exports.BILLING_ADDRESS_TOGGLE_KEYPATH = exports.BILLING_ADDRESS_TOGGLE_KEY = exports.OPEN_STATE_DEFAULT = exports.OPEN_STATE_KEYPATH = exports.OPEN_STATE_KEY = exports.SHIPPING_METHODS_STATE = exports.CHECKOUT_STATE = exports.QUICK_CHECKOUT_STATE_KEYPATH = exports.QUICK_CHECKOUT_STATE = exports.CART_STATE = exports.STATE = exports.QUANTITY_ENABLED_DEFAULT = exports.QUANTITY_ENABLED = exports.PREVIEW_ITEMS_KEYPATH = exports.PREVIEW_ITEMS_KEY = exports.PREVIEW_ITEMS_DEFAULT = exports.QUICK_CHECKOUT_AUTOMATION = exports.QUICK_CHECKOUT_STATES = exports.CART_COUNT_HIDE_RULES = exports.CART_TYPES = exports.CART_TYPE_DROPDOWN_ON_OPEN = exports.SHIPPING_METHODS_STATES = exports.CHECKOUT_STATES = exports.CART_STATES_AUTOMATION = exports.CART_STATES = exports.ADD_TO_CART_STATES = exports.NODE_TYPE_COMMERCE_DOWNLOADS_BUTTON = exports.NODE_TYPE_COMMERCE_BUY_NOW_BUTTON = exports.NODE_TYPE_COMMERCE_CHECKOUT_DISCOUNT_INPUT = exports.NODE_TYPE_COMMERCE_CHECKOUT_DISCOUNT_FORM = exports.NODE_TYPE_COMMERCE_PAYPAL_CHECKOUT_ERROR_STATE = exports.NODE_TYPE_COMMERCE_PAYPAL_CHECKOUT_FORM_CONTAINER = exports.NODE_TYPE_COMMERCE_CHECKOUT_ADDITIONAL_INFO = exports.NODE_TYPE_COMMERCE_CART_APPLE_PAY_BUTTON = exports.NODE_TYPE_COMMERCE_CART_QUICK_CHECKOUT_BUTTON = exports.NODE_TYPE_COMMERCE_CART_QUICK_CHECKOUT_ACTIONS = exports.NODE_TYPE_COMMERCE_ORDER_CONFIRMATION_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_ERROR_STATE = exports.NODE_TYPE_COMMERCE_CHECKOUT_PLACE_ORDER_BUTTON = exports.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_TOGGLE_CHECKBOX = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_EMPTY_STATE = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_LIST = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_METHODS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_BILLING_ADDRESS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_SHIPPING_ADDRESS_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_CUSTOMER_INFO_WRAPPER = exports.NODE_TYPE_COMMERCE_CHECKOUT_FORM_CONTAINER = exports.NODE_NAME_COMMERCE_ADD_TO_CART_QUANTITY_INPUT = exports.NODE_TYPE_COMMERCE_CART_FORM = exports.NODE_TYPE_COMMERCE_CART_CHECKOUT_BUTTON = exports.NODE_TYPE_COMMERCE_CART_CONTAINER = exports.NODE_TYPE_COMMERCE_CART_CONTAINER_WRAPPER = exports.NODE_TYPE_COMMERCE_CART_CLOSE_LINK = exports.NODE_TYPE_COMMERCE_CART_OPEN_LINK = exports.NODE_TYPE_COMMERCE_CART_WRAPPER = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_OPTION_LIST = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_OPTION_SELECT = exports.NODE_TYPE_COMMERCE_CART_ERROR = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_ERROR = exports.NODE_TYPE_COMMERCE_ADD_TO_CART_FORM = exports.DATA_ATTR_PRESELECT_DEFAULT_VARIANT = exports.DATA_ATTR_COUNT_HIDE_RULE = exports.DATA_ATTR_OPEN_ON_HOVER = exports.DATA_ATTR_OPEN_PRODUCT = exports.DATA_ATTR_LOADING_TEXT = exports.DATA_ATTR_NODE_TYPE = exports.DATA_ATTR_COMMERCE_PRODUCT_ID = exports.DATA_ATTR_COMMERCE_OPTION_SET_ID = exports.DATA_ATTR_COMMERCE_PRODUCT_CURRENT_SKU_VALUES = exports.DATA_ATTR_COMMERCE_SKU_ID = void 0;
+exports.ORDER_TYPE = exports.CHECKOUT_BINDING_ROOT_QUERY_PATH = exports.symbolMap = exports.EDITABLE_STYLE_NAMES = exports.DATA_ATTR_PUBLISHABLE_KEY = exports.ANIMATION_DURATION_KEYPATH = exports.ANIMATION_DURATION_KEY = exports.ANIMATION_DURATION_DEFAULT = exports.DATA_ATTR_ANIMATION_DURATION = exports.ANIMATION_EASING_KEYPATH = exports.ANIMATION_EASING_KEY = exports.ANIMATION_EASING_DEFAULT = exports.DATA_ATTR_ANIMATION_EASING = exports.ADD_TO_CART_ERRORS = exports.CART_ERRORS = exports.CHECKOUT_ERRORS = exports.WF_SKU_CONDITION_DATA_KEY = exports.WF_SKU_BINDING_DATA_KEY = exports.WF_TEMPLATE_ID_DATA_KEY = exports.WF_COLLECTION_DATA_KEY = void 0;
 var DATA_ATTR_COMMERCE_SKU_ID = 'data-commerce-sku-id';
 exports.DATA_ATTR_COMMERCE_SKU_ID = DATA_ATTR_COMMERCE_SKU_ID;
 var DATA_ATTR_COMMERCE_PRODUCT_CURRENT_SKU_VALUES = 'data-commerce-product-sku-values';
@@ -76340,6 +76387,8 @@ var DATA_ATTR_OPEN_ON_HOVER = 'data-open-on-hover';
 exports.DATA_ATTR_OPEN_ON_HOVER = DATA_ATTR_OPEN_ON_HOVER;
 var DATA_ATTR_COUNT_HIDE_RULE = 'data-count-hide-rule';
 exports.DATA_ATTR_COUNT_HIDE_RULE = DATA_ATTR_COUNT_HIDE_RULE;
+var DATA_ATTR_PRESELECT_DEFAULT_VARIANT = 'data-preselect-default-variant';
+exports.DATA_ATTR_PRESELECT_DEFAULT_VARIANT = DATA_ATTR_PRESELECT_DEFAULT_VARIANT;
 var NODE_TYPE_COMMERCE_ADD_TO_CART_FORM = 'commerce-add-to-cart-form';
 exports.NODE_TYPE_COMMERCE_ADD_TO_CART_FORM = NODE_TYPE_COMMERCE_ADD_TO_CART_FORM;
 var NODE_TYPE_COMMERCE_ADD_TO_CART_ERROR = 'commerce-add-to-cart-error';
