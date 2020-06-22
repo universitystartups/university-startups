@@ -11786,10 +11786,24 @@ var errorCodeToCheckoutErrorType = function errorCodeToCheckoutErrorType(code, m
 
     case 'ItemNotFound':
       return 'product';
+    // 'InvalidDiscount' has been renamed to 'DiscountInvalid', but it needs
+    // to be listed here to support sites that haven't been published since this change.
 
     case 'InvalidDiscount':
+    case 'DiscountInvalid':
+    case 'DiscountDoesNotExist':
       {
         return 'invalid-discount';
+      }
+
+    case 'DiscountExpired':
+      {
+        return 'expired-discount';
+      }
+
+    case 'DiscountUsageReached':
+      {
+        return 'usage-reached-discount';
       }
 
     default:
@@ -39122,6 +39136,9 @@ var SharedConfig = function () {
   api.PUBLISH_TASK.MAX_POLL_RETRIES = Math.floor(api.PUBLISH_TASK.POLLING_TIMEOUT / api.PUBLISH_TASK.POLLING_INTERVAL);
   api.SYBG_HOURS = 2;
   api.MKTG_CHANNEL_COOKIE = 'wf_mktg_channel';
+  api.EXP_UNIQUE_ID_COOKIE = 'wf_exp_uniqueId';
+  api.EXP_ASSIGNMENTS_COOKIE = 'wf_exp_assignments';
+  api.FIRST_TOUCH_COOKIE = 'wf_first_touch';
   api.DNSSEC_STATUS = {
     enabled: 'enabled',
     disabled: 'disabled',
@@ -76625,7 +76642,9 @@ var PRICING_ERR = 'PRICING_ERROR';
 var ORDER_MIN_ERR = 'ORDER_MINIMUM_ERROR';
 var ORDER_EXTRAS_ERR = 'ORDER_EXTRAS_ERROR';
 var PRODUCT_ERR = 'PRODUCT_ERROR';
-var INVALID_DISCOUNT_ERR = 'INVALID_DISCOUNT_ERROR'; // The keys for these errors need to be stable since they're used in checkoutUtils.js::updateErrorMessage
+var INVALID_DISCOUNT_ERR = 'INVALID_DISCOUNT_ERROR';
+var EXPIRED_DISCOUNT_ERR = 'EXPIRED_DISCOUNT_ERROR';
+var USAGE_REACHED_DISCOUNT_ERR = 'USAGE_REACHED_DISCOUNT_ERROR'; // The keys for these errors need to be stable since they're used in checkoutUtils.js::updateErrorMessage
 
 var CHECKOUT_ERRORS = {
   INFO: {
@@ -76691,6 +76710,18 @@ var CHECKOUT_ERRORS = {
     name: 'Invalid discount error',
     copy: 'This discount is invalid.',
     path: ['data', 'commerce', INVALID_DISCOUNT_ERR]
+  },
+  EXPIRED_DISCOUNT: {
+    id: EXPIRED_DISCOUNT_ERR,
+    name: 'Discount expired',
+    copy: 'This discount is no longer available.',
+    path: ['data', 'commerce', EXPIRED_DISCOUNT_ERR]
+  },
+  USAGE_REACHED_DISCOUNT: {
+    id: USAGE_REACHED_DISCOUNT_ERR,
+    name: 'Discount usage limit reached',
+    copy: 'This discount is no longer available.',
+    path: ['data', 'commerce', USAGE_REACHED_DISCOUNT_ERR]
   }
 };
 exports.CHECKOUT_ERRORS = CHECKOUT_ERRORS;
@@ -81376,7 +81407,9 @@ var weakMemo = function weakMemo(fn) {
   var map = new WeakMap(); // $FlowFixMe
 
   var memFn = function memFn(arg) {
-    if (false) { var e; }
+    if (!(0, _isObject["default"])(arg) && !(0, _isBoolean["default"])(arg)) {
+      throw new TypeError("weakMemo: Expected an object or boolean as an argument to ".concat(memFn.displayName, " but got ").concat(String(arg)));
+    }
 
     var key = typeof arg === 'boolean' ? arg && True || False : arg; // Flow doesn't seem to like True/False since they don't always
     // fit the expected type of `arg`
